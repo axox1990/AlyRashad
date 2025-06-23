@@ -1,0 +1,976 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Interactive Resume | Aly Rashad</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        :root {
+            --blue-50: #eff6ff;
+            --blue-100: #dbeafe;
+            --blue-200: #bfdbfe;
+            --blue-300: #93c5fd;
+            --blue-400: #60a5fa;
+            --blue-500: #3b82f6;
+            --blue-600: #2563eb;
+            --blue-700: #1d4ed8;
+            --blue-800: #1e40af;
+            --blue-900: #1e3a8a;
+            
+            --gray-50: #f8fafc;
+            --gray-100: #f1f5f9;
+            --gray-200: #e2e8f0;
+            --gray-300: #cbd5e1;
+            --gray-400: #94a3b8;
+            --gray-500: #64748b;
+            --gray-600: #475569;
+            --gray-700: #334155;
+            --gray-800: #1e293b;
+            --gray-900: #0f172a;
+            
+            --slate-50: #f8fafc;
+            --slate-100: #f1f5f9;
+            --slate-200: #e2e8f0;
+            --slate-300: #cbd5e1;
+            --slate-400: #94a3b8;
+            --slate-500: #64748b;
+            --slate-600: #475569;
+            --slate-700: #334155;
+            --slate-800: #1e293b;
+            --slate-900: #0f172a;
+            
+            --emerald-400: #34d399;
+            --emerald-500: #10b981;
+            --red-400: #f87171;
+            --red-500: #ef4444;
+            --amber-400: #fbbf24;
+            --amber-500: #f59e0b;
+        }
+        
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--slate-50);
+            color: var(--gray-800);
+            margin: 0;
+            padding: 0;
+            line-height: 1.6;
+        }
+        
+        .container {
+            width: 100%;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 1.5rem;
+        }
+        
+        .section {
+            padding: 4rem 0;
+        }
+        
+        .card {
+            background-color: white;
+            border-radius: 0.75rem;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+            overflow: hidden;
+            transition: all 0.3s ease;
+        }
+        
+        .card:hover {
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+            transform: translateY(-3px);
+        }
+        
+        .btn {
+            display: inline-block;
+            padding: 0.75rem 1.5rem;
+            background-color: var(--blue-600);
+            color: white;
+            border-radius: 0.375rem;
+            font-weight: 500;
+            text-align: center;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            border: none;
+            cursor: pointer;
+        }
+        
+        .btn:hover {
+            background-color: var(--blue-700);
+            transform: translateY(-2px);
+        }
+        
+        .btn-outline {
+            background-color: transparent;
+            border: 1px solid var(--blue-600);
+            color: var(--blue-600);
+        }
+        
+        .btn-outline:hover {
+            background-color: var(--blue-600);
+            color: white;
+        }
+        
+        /* Header & Navigation */
+        .header {
+            background-color: rgba(255, 255, 255, 0.8);
+            backdrop-filter: blur(10px);
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+            position: sticky;
+            top: 0;
+            z-index: 50;
+        }
+        
+        .nav-link {
+            transition: color 0.3s ease;
+            color: var(--gray-600);
+            text-decoration: none;
+            padding: 0.5rem 1rem;
+            border-radius: 0.375rem;
+            font-weight: 500;
+        }
+        
+        .nav-link:hover {
+            color: var(--blue-600);
+        }
+        
+        .nav-link.active {
+            color: var(--blue-600);
+            font-weight: 600;
+        }
+        
+        /* Timeline */
+        .timeline-item {
+            position: relative;
+            padding-left: 2.5rem;
+            margin-bottom: 2rem;
+        }
+        
+        .timeline-item:last-child {
+            margin-bottom: 0;
+        }
+        
+        .timeline-item::before {
+            content: '';
+            position: absolute;
+            left: 1.75rem;
+            top: 1.5rem;
+            bottom: -1rem;
+            width: 2px;
+            background-color: var(--gray-300);
+        }
+        
+        .timeline-item:last-child::before {
+            bottom: 1.5rem;
+        }
+        
+        .timeline-dot {
+            position: absolute;
+            left: 0;
+            top: 0.25rem;
+            width: 2rem;
+            height: 2rem;
+            border-radius: 50%;
+            background-color: white;
+            border: 2px solid var(--gray-300);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s ease;
+            z-index: 10;
+        }
+        
+        .timeline-button {
+            background: none;
+            border: none;
+            text-align: left;
+            padding: 0.5rem;
+            width: 100%;
+            cursor: pointer;
+            border-radius: 0.375rem;
+            transition: all 0.3s ease;
+        }
+        
+        .timeline-button:hover {
+            background-color: var(--blue-50);
+        }
+        
+        .timeline-button.active .timeline-dot {
+            background-color: var(--blue-600);
+            border-color: var(--blue-300);
+        }
+        
+        .timeline-button.active {
+            color: var(--blue-600);
+            font-weight: 600;
+        }
+        
+        /* Chart */
+        .chart-container {
+            position: relative;
+            width: 100%;
+            height: 350px;
+            margin: 0 auto;
+        }
+        
+        /* Skill badges */
+        .skill-badge {
+            display: inline-block;
+            padding: 0.5rem 1rem;
+            border-radius: 9999px;
+            font-size: 0.875rem;
+            font-weight: 500;
+            margin: 0.25rem;
+        }
+        
+        .skill-badge.financial {
+            background-color: var(--blue-100);
+            color: var(--blue-800);
+        }
+        
+        .skill-badge.technical {
+            background-color: var(--gray-200);
+            color: var(--gray-800);
+        }
+        
+        /* Footer */
+        .footer {
+            background-color: var(--gray-800);
+            color: var(--gray-400);
+            padding: 2rem 0;
+            text-align: center;
+        }
+        
+        /* Responsive */
+        @media (max-width: 768px) {
+            .grid-cols-1-md {
+                grid-template-columns: 1fr;
+            }
+            
+            .section {
+                padding: 2.5rem 0;
+            }
+            
+            .chart-container {
+                height: 300px;
+            }
+        }
+        
+        /* Mobile menu */
+        .mobile-menu {
+            display: none;
+        }
+        
+        .mobile-menu.open {
+            display: block;
+        }
+        
+        .hamburger-icon {
+            display: flex;
+            flex-direction: column;
+            justify-content: space-around;
+            width: 1.5rem;
+            height: 1.5rem;
+            cursor: pointer;
+        }
+        
+        .hamburger-icon span {
+            display: block;
+            height: 2px;
+            width: 100%;
+            background-color: var(--gray-600);
+            border-radius: 2px;
+            transition: all 0.3s ease;
+        }
+        
+        /* Hero section */
+        .hero {
+            text-align: center;
+            padding: 6rem 0;
+            background: linear-gradient(135deg, var(--blue-50) 0%, var(--slate-50) 100%);
+            border-bottom: 1px solid var(--gray-200);
+        }
+        
+        /* Typography */
+        h1, h2, h3, h4, h5, h6 {
+            font-weight: 700;
+            line-height: 1.25;
+            color: var(--gray-900);
+        }
+        
+        h1 {
+            font-size: 3rem;
+            line-height: 1;
+        }
+        
+        h2 {
+            font-size: 2.25rem;
+        }
+        
+        h3 {
+            font-size: 1.5rem;
+        }
+        
+        .text-xl {
+            font-size: 1.25rem;
+        }
+        
+        .text-lg {
+            font-size: 1.125rem;
+        }
+        
+        /* Grid */
+        .grid {
+            display: grid;
+            gap: 1.5rem;
+        }
+        
+        .grid-cols-1 {
+            grid-template-columns: 1fr;
+        }
+        
+        .grid-cols-2 {
+            grid-template-columns: repeat(2, 1fr);
+        }
+        
+        .grid-cols-3 {
+            grid-template-columns: repeat(3, 1fr);
+        }
+        
+        .grid-cols-4 {
+            grid-template-columns: repeat(4, 1fr);
+        }
+        
+        .gap-6 {
+            gap: 1.5rem;
+        }
+        
+        .gap-8 {
+            gap: 2rem;
+        }
+        
+        .gap-12 {
+            gap: 3rem;
+        }
+        
+        /* Utility classes */
+        .text-center {
+            text-align: center;
+        }
+        
+        .mx-auto {
+            margin-left: auto;
+            margin-right: auto;
+        }
+        
+        .my-8 {
+            margin-top: 2rem;
+            margin-bottom: 2rem;
+        }
+        
+        .mt-4 {
+            margin-top: 1rem;
+        }
+        
+        .mt-6 {
+            margin-top: 1.5rem;
+        }
+        
+        .mt-8 {
+            margin-top: 2rem;
+        }
+        
+        .mt-12 {
+            margin-top: 3rem;
+        }
+        
+        .p-4 {
+            padding: 1rem;
+        }
+        
+        .p-6 {
+            padding: 1.5rem;
+        }
+        
+        .p-8 {
+            padding: 2rem;
+        }
+        
+        .py-2 {
+            padding-top: 0.5rem;
+            padding-bottom: 0.5rem;
+        }
+        
+        .py-4 {
+            padding-top: 1rem;
+            padding-bottom: 1rem;
+        }
+        
+        .py-6 {
+            padding-top: 1.5rem;
+            padding-bottom: 1.5rem;
+        }
+        
+        .px-4 {
+            padding-left: 1rem;
+            padding-right: 1rem;
+        }
+        
+        .px-6 {
+            padding-left: 1.5rem;
+            padding-right: 1.5rem;
+        }
+        
+        .px-8 {
+            padding-left: 2rem;
+            padding-right: 2rem;
+        }
+        
+        .rounded-lg {
+            border-radius: 0.5rem;
+        }
+        
+        .rounded-xl {
+            border-radius: 0.75rem;
+        }
+        
+        .shadow-md {
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+        }
+        
+        .flex {
+            display: flex;
+        }
+        
+        .flex-col {
+            flex-direction: column;
+        }
+        
+        .items-center {
+            align-items: center;
+        }
+        
+        .justify-center {
+            justify-content: center;
+        }
+        
+        .justify-between {
+            justify-content: space-between;
+        }
+        
+        .hidden {
+            display: none;
+        }
+        
+        @media (min-width: 768px) {
+            .md\:block {
+                display: block;
+            }
+            
+            .md\:flex {
+                display: flex;
+            }
+            
+            .md\:hidden {
+                display: none;
+            }
+        }
+    </style>
+</head>
+<body class="antialiased">
+    <!-- Header & Navigation -->
+    <header id="header" class="header">
+        <nav class="container py-4">
+            <div class="flex items-center justify-between">
+                <div>
+                    <a href="#home" class="text-xl font-bold text-gray-800">Aly Rashad</a>
+                </div>
+                <div class="hidden md:block">
+                    <div class="flex items-center space-x-4">
+                        <a href="#home" class="nav-link">Home</a>
+                        <a href="#highlights" class="nav-link">Highlights</a>
+                        <a href="#experience" class="nav-link">Experience</a>
+                        <a href="#skills" class="nav-link">Skills</a>
+                        <a href="#education" class="nav-link">Education</a>
+                    </div>
+                </div>
+                <div class="md:hidden">
+                    <button id="mobile-menu-button" class="p-2 rounded-md text-gray-500 hover:text-gray-700 focus:outline-none">
+                        <div class="hamburger-icon">
+                            <span></span>
+                            <span></span>
+                            <span></span>
+                        </div>
+                    </button>
+                </div>
+            </div>
+        </nav>
+        <div id="mobile-menu" class="mobile-menu md:hidden">
+            <div class="px-2 py-3 space-y-1">
+                <a href="#home" class="nav-link block px-3 py-2">Home</a>
+                <a href="#highlights" class="nav-link block px-3 py-2">Highlights</a>
+                <a href="#experience" class="nav-link block px-3 py-2">Experience</a>
+                <a href="#skills" class="nav-link block px-3 py-2">Skills</a>
+                <a href="#education" class="nav-link block px-3 py-2">Education</a>
+            </div>
+        </div>
+    </header>
+
+    <main>
+        <!-- Home/Hero Section -->
+        <section id="home" class="hero">
+            <div class="container">
+                <h1 class="text-4xl md:text-5xl font-extrabold">
+                    <span class="block">Aly Rashad</span>
+                    <span class="block text-blue-600 text-3xl md:text-4xl mt-4">Senior Accountant</span>
+                </h1>
+                <p class="mt-6 max-w-2xl mx-auto text-lg md:text-xl text-gray-600">
+                    A results-oriented Senior Accountant with over 10 years of experience in financial analysis, cost management, and comprehensive financial reporting. Adept at leveraging financial insights to drive strategic decision-making and improve organizational performance.
+                </p>
+                <div class="mt-8 flex flex-wrap justify-center items-center gap-4 text-gray-600">
+                    <a href="mailto:a.xox1990@gmail.com" class="hover:text-blue-600 transition-colors flex items-center">
+                        <svg class="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 20 20"><path d="M2.003 5.884L10 9.882l7.997-3.998A2 2 0 0016 4H4a2 2 0 00-1.997 1.884z"></path><path d="M18 8.118l-8 4-8-4V14a2 2 0 002 2h12a2 2 0 002-2V8.118z"></path></svg>
+                        a.xox1990@gmail.com
+                    </a>
+                    <a href="tel:+966509334171" class="hover:text-blue-600 transition-colors flex items-center">
+                        <svg class="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 20 20"><path d="M2 3a1 1 0 011-1h2.153a1 1 0 01.986.836l.74 4.435a1 1 0 01-.54 1.06l-1.548.773a11.037 11.037 0 006.105 6.105l.774-1.548a1 1 0 011.059-.54l4.435.74a1 1 0 01.836.986V17a1 1 0 01-1 1h-2C7.82 18 2 12.18 2 5V3z"></path></svg>
+                        +966 509 334 171
+                    </a>
+                    <a href="https://linkedin.com/in/alyrashad" target="_blank" class="hover:text-blue-600 transition-colors flex items-center">
+                        <svg class="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 24 24"><path d="M19 0h-14c-2.761 0-5 2.239-5 5v14c0 2.761 2.239 5 5 5h14c2.762 0 5-2.239 5-5v-14c0-2.761-2.238-5-5-5zm-11 19h-3v-11h3v11zm-1.5-12.268c-.966 0-1.75-.79-1.75-1.764s.784-1.764 1.75-1.764 1.75.79 1.75 1.764-.783 1.764-1.75 1.764zm13.5 12.268h-3v-5.604c0-3.368-4-3.113-4 0v5.604h-3v-11h3v1.765c1.396-2.586 7-2.777 7 2.476v6.759z"/></svg>
+                        LinkedIn
+                    </a>
+                </div>
+            </div>
+        </section>
+
+        <!-- Highlights Section -->
+        <section id="highlights" class="section">
+            <div class="container">
+                <div class="card p-6 md:p-8">
+                    <div class="text-center">
+                        <h2 class="text-3xl font-extrabold text-gray-900">Career Highlights & Impact</h2>
+                        <p class="mt-4 max-w-2xl mx-auto text-lg text-gray-600">
+                            This section provides a visual summary of key quantifiable achievements. The chart below illustrates the direct impact of strategic financial management on operational efficiency and accuracy.
+                        </p>
+                    </div>
+                    <div class="mt-12">
+                        <div class="chart-container">
+                            <canvas id="achievementsChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Experience Section -->
+        <section id="experience" class="section bg-gray-50">
+            <div class="container">
+                <div class="text-center mb-12">
+                    <h2 class="text-3xl font-extrabold text-gray-900">Professional Experience</h2>
+                    <p class="mt-4 max-w-3xl mx-auto text-lg text-gray-600">
+                        Explore a detailed history of my professional roles over the past decade. Click on any position in the timeline to view the corresponding responsibilities and key accomplishments.
+                    </p>
+                </div>
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+                    <div class="card p-6">
+                        <div id="timeline-controls" class="relative">
+                            <!-- Timeline items will be injected here by JS -->
+                        </div>
+                    </div>
+                    <div class="md:col-span-2">
+                        <div id="experience-details" class="card p-6 md:p-8 transition-all duration-500">
+                            <!-- Details will be injected here by JS -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Skills Section -->
+        <section id="skills" class="section">
+            <div class="container">
+                <div class="card p-6 md:p-8">
+                    <div class="text-center">
+                        <h2 class="text-3xl font-extrabold text-gray-900">Core Competencies & Skills</h2>
+                        <p class="mt-4 max-w-2xl mx-auto text-lg text-gray-600">
+                            This section outlines the key financial, analytical, and technical skills that underpin my professional capabilities.
+                        </p>
+                    </div>
+                    <div class="mt-12 grid grid-cols-1 md:grid-cols-2 gap-8">
+                        <div>
+                            <h3 class="text-xl font-semibold text-gray-800 mb-4">Financial & Analytical Skills</h3>
+                            <div id="financial-skills" class="flex flex-wrap">
+                                <!-- Skills will be injected by JS -->
+                            </div>
+                        </div>
+                        <div>
+                            <h3 class="text-xl font-semibold text-gray-800 mb-4">Technical Tools</h3>
+                            <div id="technical-skills" class="flex flex-wrap">
+                                <!-- Tools will be injected by JS -->
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Education & Certifications Section -->
+        <section id="education" class="section bg-gray-50">
+            <div class="container">
+                <div class="text-center mb-12">
+                    <h2 class="text-3xl font-extrabold text-gray-900">Education & Certifications</h2>
+                    <p class="mt-4 max-w-2xl mx-auto text-lg text-gray-600">
+                        My academic background and commitment to continuous professional development are foundational to my expertise.
+                    </p>
+                </div>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div class="card p-6">
+                        <h3 class="text-lg font-semibold text-blue-600">Formal Education</h3>
+                        <p class="mt-2 text-lg font-medium text-gray-900">Bachelor of Commerce (English Section)</p>
+                        <p class="text-gray-600">Mansoura University, Egypt</p>
+                        <p class="text-sm text-gray-500 mt-2">Graduated: 2011</p>
+                    </div>
+                    <div class="card p-6">
+                        <h3 class="text-lg font-semibold text-blue-600">Professional Certification</h3>
+                        <p class="mt-2 text-lg font-medium text-gray-900">Certified Management Accountant (CMA)</p>
+                        <p class="text-gray-600">Part 1 Passed</p>
+                        <p class="text-sm text-gray-500 mt-2">Currently Pursuing Full Certification</p>
+                    </div>
+                    <div class="card p-6 md:col-span-2">
+                        <h3 class="text-lg font-semibold text-blue-600">Additional Training</h3>
+                        <ul id="training-list" class="mt-4 space-y-2">
+                            <!-- Training will be injected by JS -->
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <footer class="footer">
+        <div class="container">
+            <p>&copy; <span id="currentYear"></span> Aly Rashad. Interactive resume created to showcase professional experience.</p>
+        </div>
+    </footer>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Resume data
+            const resumeData = {
+                experience: [
+                    {
+                        id: 'alduhian',
+                        role: 'Senior Accountant',
+                        company: 'Alduhian Est Trading',
+                        location: 'Riyadh, Saudi Arabia',
+                        period: 'Dec 2021 – Present',
+                        details: [
+                            'Managed and monitored treasury operations across three branches, ensuring financial integrity and optimal liquidity.',
+                            'Spearheaded initiatives to enhance financial controls, resulting in improved reporting accuracy and compliance.',
+                            'Conducted detailed financial data analysis to provide actionable insights, directly supporting strategic decision-making.',
+                            'Ensured strict compliance with all relevant financial reporting standards and tax regulations.',
+                        ],
+                    },
+                    {
+                        id: 'mansour',
+                        role: 'Sales Accountant / Senior Accountant',
+                        company: 'Mansour Sweets',
+                        location: 'Egypt',
+                        period: 'Jul 2017 – Dec 2021',
+                        details: [
+                            'Led all sales accounting operations, ensuring precise revenue recognition and timely reconciliation.',
+                            'Supported month-end and year-end close processes, contributing to the timely generation of financial statements.',
+                            'Ensured high financial data accuracy, playing a key role in comprehensive financial reporting.',
+                            'Implemented and maintained perpetual inventory control systems, significantly improving stock management efficiency.',
+                            'Conducted regular treasury audits to safeguard assets and verify financial transactions, reducing audit discrepancies by 20%.',
+                        ],
+                    },
+                    {
+                        id: 'youniq',
+                        role: 'Cost Manager',
+                        company: 'YouniQ Co',
+                        location: 'Egypt',
+                        period: 'Sep 2016 – Jul 2017',
+                        details: [
+                            'Identified and implemented cost-saving measures, resulting in optimized operational expenditures by an estimated 10%.',
+                            'Developed and executed inventory management strategies, reducing carrying costs and improving stock turnover.',
+                            'Analyzed complex cost data to pinpoint inefficiencies and drive continuous improvement initiatives.',
+                        ],
+                    },
+                    {
+                        id: 'delta',
+                        role: 'Accountant',
+                        company: 'Delta Mills',
+                        location: 'Egypt',
+                        period: 'Aug 2017',
+                        details: [
+                            'Managed accounts payable and accounts receivable functions, ensuring timely payments and collections.',
+                            'Performed thorough account reconciliations to guarantee ledger accuracy and resolve discrepancies, reducing reconciliation time by 30%.',
+                        ],
+                    },
+                    {
+                        id: 'wady',
+                        role: 'Accountant',
+                        company: 'Wady El-Nile Soft Drinks Co',
+                        location: 'Egypt',
+                        period: 'Mar 2013 – May 2016',
+                        details: [
+                            'Oversaw daily financial transactions, ensuring accurate documentation and compliance with company policies.',
+                            'Supported academic research by conducting data analysis using SPSS, providing key insights.',
+                        ],
+                    },
+                ],
+                skills: {
+                    financial: [
+                        'Financial Analysis', 'Cost Management', 'Budgeting & Forecasting', 
+                        'Financial Reporting (IFRS/GAAP)', 'Treasury Management', 'Payroll Processing', 
+                        'Tax Compliance (VAT, WHT)', 'Account Reconciliation', 'Inventory Control', 'Audit Preparation'
+                    ],
+                    technical: ['Microsoft Excel (Advanced)', 'SPSS', 'Peachtree'],
+                },
+                training: [
+                    'Financial Manager Diploma - American Board of Professional Studies',
+                    'Peachtree Course - Mansoura University',
+                    'Accountants\' Preparation Course - Mansoura University',
+                    'International Computer Driving License (ICDL)',
+                    'Diploma in Neuro-Linguistic Programming'
+                ]
+            };
+            
+            const achievementsData = {
+                labels: ['Reconciliation Time', 'Audit Discrepancies', 'Cash Flow', 'Reporting Errors'],
+                data: [30, 20, 15, 25],
+                descriptions: [
+                    'Reduced reconciliation time by 30% through process optimization',
+                    'Decreased audit discrepancies by 20% with improved controls',
+                    'Improved cash flow forecasting accuracy by 15%',
+                    'Reduced financial reporting errors by 25%'
+                ]
+            };
+
+            // --- Achievements Chart ---
+            const ctx = document.getElementById('achievementsChart').getContext('2d');
+            new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: achievementsData.labels,
+                    datasets: [{
+                        label: 'Improvement / Reduction (%)',
+                        data: achievementsData.data,
+                        backgroundColor: [
+                            'rgba(59, 130, 246, 0.7)',
+                            'rgba(16, 185, 129, 0.7)',
+                            'rgba(239, 68, 68, 0.7)',
+                            'rgba(245, 158, 11, 0.7)',
+                        ],
+                        borderColor: [
+                            'rgba(59, 130, 246, 1)',
+                            'rgba(16, 185, 129, 1)',
+                            'rgba(239, 68, 68, 1)',
+                            'rgba(245, 158, 11, 1)',
+                        ],
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    indexAxis: 'y',
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        x: { 
+                            beginAtZero: true, 
+                            ticks: { 
+                                callback: value => value + '%' 
+                            },
+                            grid: {
+                                color: 'rgba(0, 0, 0, 0.05)'
+                            }
+                        },
+                        y: { 
+                            ticks: { 
+                                autoSkip: false, 
+                                maxRotation: 0, 
+                                minRotation: 0 
+                            },
+                            grid: {
+                                color: 'rgba(0, 0, 0, 0.05)'
+                            }
+                        }
+                    },
+                    plugins: {
+                        legend: { display: false },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    const index = context.dataIndex;
+                                    return [
+                                        `${achievementsData.labels[index]}: ${context.parsed.x}%`,
+                                        achievementsData.descriptions[index]
+                                    ];
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+
+            // --- Experience Timeline ---
+            const timelineControls = document.getElementById('timeline-controls');
+            const experienceDetailsContainer = document.getElementById('experience-details');
+
+            function displayExperience(experienceId) {
+                const experience = resumeData.experience.find(e => e.id === experienceId);
+                if (!experience) return;
+
+                experienceDetailsContainer.innerHTML = `
+                    <h3 class="text-2xl font-bold text-gray-900">${experience.role}</h3>
+                    <p class="text-lg font-semibold text-blue-600">${experience.company}</p>
+                    <p class="text-sm text-gray-500 mb-4">${experience.location} | ${experience.period}</p>
+                    <ul class="space-y-3 text-gray-700">
+                        ${experience.details.map(detail => `<li class="flex items-start">
+                            <svg class="w-5 h-5 text-blue-500 mt-0.5 mr-2 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                                <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path>
+                            </svg>
+                            <span>${detail}</span>
+                        </li>`).join('')}
+                    </ul>
+                `;
+                
+                // Update active state
+                document.querySelectorAll('.timeline-button').forEach(btn => {
+                    btn.classList.remove('active');
+                });
+                document.querySelector(`.timeline-button[data-id="${experienceId}"]`).classList.add('active');
+            }
+
+            // Create timeline items
+            resumeData.experience.forEach(exp => {
+                const button = document.createElement('button');
+                button.className = 'timeline-button relative w-full text-left';
+                button.dataset.id = exp.id;
+                button.innerHTML = `
+                    <div class="timeline-item">
+                        <div class="timeline-dot"></div>
+                        <div>
+                            <p class="font-semibold">${exp.company}</p>
+                            <p class="text-sm text-gray-600 mt-1">${exp.role}</p>
+                            <p class="text-xs text-gray-500 mt-1">${exp.period}</p>
+                        </div>
+                    </div>
+                `;
+                timelineControls.appendChild(button);
+                button.addEventListener('click', () => displayExperience(exp.id));
+            });
+            
+            // Display first experience by default
+            if (resumeData.experience.length > 0) {
+                displayExperience(resumeData.experience[0].id);
+            }
+            
+            // --- Populate Skills & Training ---
+            const financialSkillsContainer = document.getElementById('financial-skills');
+            resumeData.skills.financial.forEach(skill => {
+                const skillTag = document.createElement('span');
+                skillTag.className = 'skill-badge financial';
+                skillTag.textContent = skill;
+                financialSkillsContainer.appendChild(skillTag);
+            });
+
+            const technicalSkillsContainer = document.getElementById('technical-skills');
+            resumeData.skills.technical.forEach(skill => {
+                const skillTag = document.createElement('span');
+                skillTag.className = 'skill-badge technical';
+                skillTag.textContent = skill;
+                technicalSkillsContainer.appendChild(skillTag);
+            });
+            
+            const trainingListContainer = document.getElementById('training-list');
+            resumeData.training.forEach(item => {
+                const li = document.createElement('li');
+                li.className = 'flex items-start';
+                li.innerHTML = `
+                    <svg class="w-5 h-5 text-blue-500 mt-0.5 mr-2 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                        <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path>
+                    </svg>
+                    <span>${item}</span>
+                `;
+                trainingListContainer.appendChild(li);
+            });
+
+            // --- Mobile Menu Logic ---
+            const mobileMenuButton = document.getElementById('mobile-menu-button');
+            const mobileMenu = document.getElementById('mobile-menu');
+            mobileMenuButton.addEventListener('click', () => {
+                const isExpanded = mobileMenuButton.getAttribute('aria-expanded') === 'true';
+                mobileMenuButton.setAttribute('aria-expanded', !isExpanded);
+                mobileMenu.classList.toggle('open');
+            });
+            
+            // Close mobile menu when clicking a link
+            document.querySelectorAll('.nav-link').forEach(link => {
+                link.addEventListener('click', () => {
+                    mobileMenu.classList.remove('open');
+                    mobileMenuButton.setAttribute('aria-expanded', 'false');
+                });
+            });
+
+            // Set current year in footer
+            document.getElementById('currentYear').textContent = new Date().getFullYear();
+
+            // --- Navigation Observer Logic ---
+            const navLinks = document.querySelectorAll('.nav-link');
+            const sections = document.querySelectorAll('section');
+            const header = document.getElementById('header');
+            
+            if (header && navLinks.length > 0 && sections.length > 0) {
+                const headerHeight = header.offsetHeight;
+                
+                const sectionObserver = new IntersectionObserver((entries) => {
+                    entries.forEach(entry => {
+                        if (entry.isIntersecting) {
+                            const id = entry.target.getAttribute('id');
+                            navLinks.forEach(link => {
+                                link.classList.remove('active');
+                                if (link.getAttribute('href') === `#${id}`) {
+                                    link.classList.add('active');
+                                }
+                            });
+                        }
+                    });
+                }, {
+                    rootMargin: `-${headerHeight}px 0px 0px 0px`,
+                    threshold: 0.1
+                });
+
+                sections.forEach(section => {
+                    sectionObserver.observe(section);
+                });
+            }
+            
+            // Smooth scrolling for anchor links
+            document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+                anchor.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    
+                    const targetId = this.getAttribute('href');
+                    if (targetId === '#') return;
+                    
+                    const targetElement = document.querySelector(targetId);
+                    if (targetElement) {
+                        const headerOffset = header.offsetHeight;
+                        const elementPosition = targetElement.getBoundingClientRect().top;
+                        const offsetPosition = elementPosition - headerOffset;
+                        
+                        window.scrollBy({
+                            top: offsetPosition,
+                            behavior: 'smooth'
+                        });
+                    }
+                });
+            });
+        });
+    </script>
+</body>
+</html>
