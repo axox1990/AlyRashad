@@ -1,0 +1,510 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Interactive Resume | Aly Rashad</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Chosen Palette: Professional Blue & Neutral Gray -->
+    <!-- Application Structure Plan: The SPA is designed as a single-page, multi-section layout with a sticky navigation bar for ease of access. The structure prioritizes immediate impact and user-driven exploration. It starts with a Hero section for a strong first impression. It is followed by a "Career Highlights" dashboard featuring a bar chart of quantitative achievements to grab a recruiter's attention instantly. The core "Professional Experience" is transformed into an interactive timeline, allowing users to select a role and view details dynamically, which is more engaging than a long, static list. Skills and Education are presented in clean, scannable sections. This non-linear structure is chosen because recruiters often scan for specific information, and this design allows them to jump directly to what matters most to them, making the evaluation process faster and more efficient. -->
+    <!-- Visualization & Content Choices: 
+        1. Report Info: Quantifiable achievements (e.g., 25% error reduction). -> Goal: Inform & Compare. -> Viz/Method: Horizontal Bar Chart (Chart.js/Canvas). -> Interaction: Tooltips on hover provide context for each achievement metric. -> Justification: A chart provides a quick, high-impact visual summary of performance, making accomplishments more memorable than text alone. -> Library: Chart.js.
+        2. Report Info: Chronological work history. -> Goal: Change & Organize. -> Viz/Method: Interactive vertical timeline (HTML/CSS/JS). -> Interaction: Clicking a job title on the timeline dynamically displays its detailed description and achievements in an adjacent panel. -> Justification: This organizes over a decade of experience into a clean, manageable interface, preventing information overload and encouraging the user to explore the career path step-by-step. -> Library/Method: Vanilla JS & Tailwind CSS.
+        3. Report Info: Key skills and technical tools. -> Goal: Inform & Organize. -> Viz/Method: Grouped badges/tags (Styled HTML/CSS). -> Interaction: Subtle hover effects for visual feedback. -> Justification: Badges are a modern, scannable format that allows for quick assessment of capabilities. -> Library/Method: HTML & Tailwind CSS. -->
+    <!-- CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f8fafc; /* slate-50 */
+            color: #1f2937; /* gray-800 */
+        }
+        .nav-link {
+            transition: color 0.3s ease;
+        }
+        .nav-link.active {
+            color: #2563eb; /* blue-600 */
+            font-weight: 600;
+        }
+        .timeline-item::before {
+            content: '';
+            position: absolute;
+            left: 11px;
+            top: 12px;
+            bottom: 12px;
+            width: 2px;
+            background-color: #d1d5db; /* gray-300 */
+        }
+        .timeline-item:first-child::before {
+            top: 12px;
+        }
+        .timeline-item:last-child::before {
+            bottom: 12px;
+        }
+        .timeline-dot {
+            position: absolute;
+            left: 0;
+            top: 12px;
+            transform: translateX(-50%);
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s ease;
+        }
+        .timeline-button .timeline-dot {
+            left: 12px;
+            transform: translateX(-50%);
+        }
+        .timeline-button.active .timeline-dot {
+            background-color: #2563eb; /* blue-600 */
+            border-color: #93c5fd; /* blue-300 */
+        }
+         .timeline-button.active {
+            color: #2563eb; /* blue-600 */
+        }
+        .chart-container {
+            position: relative;
+            width: 100%;
+            max-width: 800px;
+            margin-left: auto;
+            margin-right: auto;
+            height: 350px;
+            max-height: 40vh;
+        }
+        @media (min-width: 768px) {
+            .chart-container {
+                height: 400px;
+            }
+        }
+        .hamburger-icon span {
+            transition: all 0.3s ease-in-out;
+        }
+    </style>
+</head>
+<body class="antialiased">
+
+    <!-- Header & Navigation -->
+    <header id="header" class="bg-white/80 backdrop-blur-sm shadow-sm sticky top-0 z-50">
+        <nav class="container mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex items-center justify-between h-16">
+                <div class="flex-shrink-0">
+                    <a href="#home" class="text-xl font-bold text-gray-800">Aly Rashad</a>
+                </div>
+                <div class="hidden md:block">
+                    <div class="ml-10 flex items-baseline space-x-4">
+                        <a href="#home" class="nav-link px-3 py-2 rounded-md text-sm font-medium text-gray-600 hover:text-blue-600">Home</a>
+                        <a href="#highlights" class="nav-link px-3 py-2 rounded-md text-sm font-medium text-gray-600 hover:text-blue-600">Highlights</a>
+                        <a href="#experience" class="nav-link px-3 py-2 rounded-md text-sm font-medium text-gray-600 hover:text-blue-600">Experience</a>
+                        <a href="#skills" class="nav-link px-3 py-2 rounded-md text-sm font-medium text-gray-600 hover:text-blue-600">Skills</a>
+                        <a href="#education" class="nav-link px-3 py-2 rounded-md text-sm font-medium text-gray-600 hover:text-blue-600">Education</a>
+                    </div>
+                </div>
+                <div class="md:hidden">
+                    <button id="mobile-menu-button" class="inline-flex items-center justify-center p-2 rounded-md text-gray-400 hover:text-gray-500 hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-blue-500" aria-controls="mobile-menu" aria-expanded="false">
+                        <span class="sr-only">Open main menu</span>
+                        <div class="hamburger-icon w-6 h-6 flex flex-col justify-around">
+                            <span class="block h-0.5 w-full bg-current rounded-sm"></span>
+                            <span class="block h-0.5 w-full bg-current rounded-sm"></span>
+                            <span class="block h-0.5 w-full bg-current rounded-sm"></span>
+                        </div>
+                    </button>
+                </div>
+            </div>
+        </nav>
+        <div id="mobile-menu" class="md:hidden hidden">
+            <div class="px-2 pt-2 pb-3 space-y-1 sm:px-3">
+                 <a href="#home" class="nav-link block px-3 py-2 rounded-md text-base font-medium text-gray-600 hover:text-blue-600">Home</a>
+                 <a href="#highlights" class="nav-link block px-3 py-2 rounded-md text-base font-medium text-gray-600 hover:text-blue-600">Highlights</a>
+                 <a href="#experience" class="nav-link block px-3 py-2 rounded-md text-base font-medium text-gray-600 hover:text-blue-600">Experience</a>
+                 <a href="#skills" class="nav-link block px-3 py-2 rounded-md text-base font-medium text-gray-600 hover:text-blue-600">Skills</a>
+                 <a href="#education" class="nav-link block px-3 py-2 rounded-md text-base font-medium text-gray-600 hover:text-blue-600">Education</a>
+            </div>
+        </div>
+    </header>
+
+    <main class="container mx-auto px-4 sm:px-6 lg:px-8 py-8 md:py-12">
+
+        <!-- Home/Hero Section -->
+        <section id="home" class="text-center py-16 md:py-24">
+            <h1 class="text-4xl md:text-5xl font-extrabold tracking-tight text-gray-900">
+                <span class="block">Aly Rashad</span>
+                <span class="block text-blue-600 text-3xl md:text-4xl mt-2">Senior Accountant</span>
+            </h1>
+            <p class="mt-6 max-w-2xl mx-auto text-lg md:text-xl text-gray-600">
+                A results-oriented Senior Accountant with over 10 years of experience in financial analysis, cost management, and comprehensive financial reporting. Adept at leveraging financial insights to drive strategic decision-making and improve organizational performance.
+            </p>
+            <div class="mt-8 flex justify-center items-center space-x-6 text-gray-500">
+                <a href="mailto:a.xox1990@gmail.com" class="hover:text-blue-600 transition-colors">a.xox1990@gmail.com</a>
+                <span>&bull;</span>
+                <a href="tel:+966509334171" class="hover:text-blue-600 transition-colors">+966 509 334 171</a>
+                 <span>&bull;</span>
+                <a href="https://linkedin.com/in/alyrashad" target="_blank" class="hover:text-blue-600 transition-colors">LinkedIn</a>
+            </div>
+        </section>
+
+        <!-- Highlights Section -->
+        <section id="highlights" class="py-16 md:py-24 bg-white rounded-xl shadow-md">
+             <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                <div class="text-center">
+                    <h2 class="text-3xl font-extrabold text-gray-900">Career Highlights & Impact</h2>
+                    <p class="mt-4 max-w-2xl mx-auto text-lg text-gray-600">
+                        This section provides a visual summary of key quantifiable achievements. The chart below illustrates the direct impact of strategic financial management on operational efficiency and accuracy. Interact with the chart elements to see the specific metrics.
+                    </p>
+                </div>
+                <div class="mt-12">
+                    <div class="chart-container">
+                        <canvas id="achievementsChart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Experience Section -->
+        <section id="experience" class="py-16 md:py-24">
+            <div class="text-center mb-12">
+                <h2 class="text-3xl font-extrabold text-gray-900">Professional Experience</h2>
+                <p class="mt-4 max-w-3xl mx-auto text-lg text-gray-600">
+                    Explore a detailed history of my professional roles over the past decade. Click on any position in the timeline to view the corresponding responsibilities and key accomplishments. The most recent role is selected by default.
+                </p>
+            </div>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-12">
+                <div class="col-span-1">
+                    <div id="timeline-controls" class="relative">
+                        <!-- Timeline items will be injected here by JS -->
+                    </div>
+                </div>
+                <div id="experience-details" class="md:col-span-2 bg-white p-8 rounded-xl shadow-md transition-all duration-500">
+                    <!-- Details will be injected here by JS -->
+                </div>
+            </div>
+        </section>
+
+        <!-- Skills Section -->
+        <section id="skills" class="py-16 md:py-24 bg-white rounded-xl shadow-md">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                <div class="text-center">
+                    <h2 class="text-3xl font-extrabold text-gray-900">Core Competencies & Skills</h2>
+                    <p class="mt-4 max-w-2xl mx-auto text-lg text-gray-600">
+                        This section outlines the key financial, analytical, and technical skills that underpin my professional capabilities. These competencies have been applied across various roles to drive financial health and operational excellence.
+                    </p>
+                </div>
+                <div class="mt-12 grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-12">
+                    <div>
+                        <h3 class="text-xl font-semibold text-gray-800 mb-4">Financial & Analytical Skills</h3>
+                        <div id="financial-skills" class="flex flex-wrap gap-3">
+                            <!-- Skills will be injected by JS -->
+                        </div>
+                    </div>
+                    <div>
+                        <h3 class="text-xl font-semibold text-gray-800 mb-4">Technical Tools</h3>
+                        <div id="technical-skills" class="flex flex-wrap gap-3">
+                            <!-- Tools will be injected by JS -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Education & Certifications Section -->
+        <section id="education" class="py-16 md:py-24">
+            <div class="text-center mb-12">
+                <h2 class="text-3xl font-extrabold text-gray-900">Education & Certifications</h2>
+                 <p class="mt-4 max-w-2xl mx-auto text-lg text-gray-600">
+                    My academic background and commitment to continuous professional development are foundational to my expertise. This section details my formal education and the certifications I've pursued to stay current in the field of accounting and financial management.
+                </p>
+            </div>
+            <div class="max-w-4xl mx-auto grid grid-cols-1 md:grid-cols-2 gap-8">
+                <div class="bg-white p-6 rounded-lg shadow-sm">
+                    <h3 class="text-lg font-semibold text-blue-600">Formal Education</h3>
+                    <p class="mt-2 text-lg font-medium text-gray-900">Bachelor of Commerce (English Section)</p>
+                    <p class="text-gray-600">Mansoura University, Egypt</p>
+                    <p class="text-sm text-gray-500">Graduated: 2011</p>
+                </div>
+                 <div class="bg-white p-6 rounded-lg shadow-sm">
+                    <h3 class="text-lg font-semibold text-blue-600">Professional Certification</h3>
+                    <p class="mt-2 text-lg font-medium text-gray-900">Certified Management Accountant (CMA)</p>
+                    <p class="text-gray-600">Part 1 Passed</p>
+                    <p class="text-sm text-gray-500">Currently Pursuing Full Certification</p>
+                </div>
+                <div class="md:col-span-2 bg-white p-6 rounded-lg shadow-sm">
+                    <h3 class="text-lg font-semibold text-blue-600">Additional Training</h3>
+                    <ul id="training-list" class="mt-2 list-disc list-inside text-gray-700 space-y-1">
+                        <!-- Training will be injected by JS -->
+                    </ul>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <footer class="bg-gray-800">
+        <div class="max-w-7xl mx-auto py-4 px-4 sm:px-6 lg:px-8 text-center text-gray-400 text-sm">
+            <p>&copy; <span id="currentYear"></span> Aly Rashad. Interactive resume created to showcase professional experience.</p>
+        </div>
+    </footer>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            
+            const resumeData = {
+                experience: [
+                    {
+                        id: 'alduhian',
+                        role: 'Senior Accountant',
+                        company: 'Alduhian Est Trading',
+                        location: 'Riyadh, Saudi Arabia',
+                        period: 'Dec 2021 – Present',
+                        details: [
+                            'Managed and monitored treasury operations across three branches, ensuring financial integrity and optimal liquidity.',
+                            'Spearheaded initiatives to enhance financial controls, resulting in improved reporting accuracy and compliance.',
+                            'Conducted detailed financial data analysis to provide actionable insights, directly supporting strategic decision-making.',
+                            'Ensured strict compliance with all relevant financial reporting standards and tax regulations.',
+                        ],
+                    },
+                    {
+                        id: 'mansour',
+                        role: 'Sales Accountant / Senior Accountant',
+                        company: 'Mansour Sweets',
+                        location: 'Egypt',
+                        period: 'Jul 2017 – Dec 2021',
+                        details: [
+                            'Led all sales accounting operations, ensuring precise revenue recognition and timely reconciliation.',
+                            'Supported month-end and year-end close processes, contributing to the timely generation of financial statements.',
+                            'Ensured high financial data accuracy, playing a key role in comprehensive financial reporting.',
+                            'Implemented and maintained perpetual inventory control systems, significantly improving stock management efficiency.',
+                            'Conducted regular treasury audits to safeguard assets and verify financial transactions, reducing audit discrepancies by 20%.',
+                        ],
+                    },
+                    {
+                        id: 'youniq',
+                        role: 'Cost Manager',
+                        company: 'YouniQ Co',
+                        location: 'Egypt',
+                        period: 'Sep 2016 – Jul 2017',
+                        details: [
+                            'Identified and implemented cost-saving measures, resulting in optimized operational expenditures by an estimated 10%.',
+                            'Developed and executed inventory management strategies, reducing carrying costs and improving stock turnover.',
+                            'Analyzed complex cost data to pinpoint inefficiencies and drive continuous improvement initiatives.',
+                        ],
+                    },
+                    {
+                        id: 'delta',
+                        role: 'Accountant',
+                        company: 'Delta Mills',
+                        location: 'Egypt',
+                        period: 'Aug 2017',
+                        details: [
+                            'Managed accounts payable and accounts receivable functions, ensuring timely payments and collections.',
+                            'Performed thorough account reconciliations to guarantee ledger accuracy and resolve discrepancies, reducing reconciliation time by 30%.',
+                        ],
+                    },
+                     {
+                        id: 'wady',
+                        role: 'Accountant',
+                        company: 'Wady El-Nile Soft Drinks Co',
+                        location: 'Egypt',
+                        period: 'Mar 2013 – May 2016',
+                        details: [
+                            'Oversaw daily financial transactions, ensuring accurate documentation and compliance with company policies.',
+                            'Supported academic research by conducting data analysis using SPSS, providing key insights.',
+                        ],
+                    },
+                ],
+                skills: {
+                    financial: [
+                        'Financial Analysis', 'Cost Management', 'Budgeting & Forecasting', 
+                        'Financial Reporting (IFRS/GAAP)', 'Treasury Management', 'Payroll Processing', 
+                        'Tax Compliance (VAT, WHT)', 'Account Reconciliation', 'Inventory Control', 'Audit Preparation'
+                    ],
+                    technical: ['Microsoft Excel (Advanced)', 'SPSS', 'Peachtree'],
+                },
+                training: [
+                    'Financial Manager Diploma - American Board of Professional Studies',
+                    'Peachtree Course - Mansoura University',
+                    'Accountants\' Preparation Course - Mansoura University',
+                    'International Computer Driving License (ICDL)',
+                    'Diploma in Neuro-Linguistic Programming'
+                ]
+            };
+            
+            const achievementsData = {
+                labels: ['Reconciliation Time', 'Audit Discrepancies', 'Cash Flow', 'Reporting Errors'],
+                data: [30, 20, 15, 25]
+            };
+
+            // --- Achievements Chart ---
+            const ctx = document.getElementById('achievementsChart').getContext('2d');
+            new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: achievementsData.labels,
+                    datasets: [{
+                        label: 'Improvement / Reduction (%)',
+                        data: achievementsData.data,
+                        backgroundColor: [
+                            'rgba(59, 130, 246, 0.7)',
+                            'rgba(16, 185, 129, 0.7)',
+                            'rgba(239, 68, 68, 0.7)',
+                            'rgba(245, 158, 11, 0.7)',
+                        ],
+                        borderColor: [
+                            'rgba(59, 130, 246, 1)',
+                            'rgba(16, 185, 129, 1)',
+                            'rgba(239, 68, 68, 1)',
+                            'rgba(245, 158, 11, 1)',
+                        ],
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    indexAxis: 'y',
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        x: { beginAtZero: true, ticks: { callback: value => value + '%' } },
+                        y: { ticks: { autoSkip: false, maxRotation: 0, minRotation: 0 } }
+                    },
+                    plugins: {
+                        legend: { display: false },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    let label = context.dataset.label || '';
+                                    if (label) label += ': ';
+                                    if (context.parsed.x !== null) label += context.parsed.x + '%';
+                                    return label;
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+
+            // --- Experience Timeline ---
+            const timelineControls = document.getElementById('timeline-controls');
+            const experienceDetailsContainer = document.getElementById('experience-details');
+
+            function displayExperience(experienceId) {
+                const experience = resumeData.experience.find(e => e.id === experienceId);
+                if (!experience) return;
+
+                experienceDetailsContainer.innerHTML = `
+                    <h3 class="text-2xl font-bold text-gray-900">${experience.role}</h3>
+                    <p class="text-lg font-semibold text-blue-600">${experience.company}</p>
+                    <p class="text-sm text-gray-500 mb-4">${experience.location} | ${experience.period}</p>
+                    <ul class="space-y-3 list-disc list-inside text-gray-700">
+                        ${experience.details.map(detail => `<li>${detail}</li>`).join('')}
+                    </ul>
+                `;
+                document.querySelectorAll('.timeline-button').forEach(btn => btn.classList.remove('active'));
+                document.querySelector(`.timeline-button[data-id="${experienceId}"]`).classList.add('active');
+            }
+
+            resumeData.experience.forEach(exp => {
+                const button = document.createElement('button');
+                button.className = 'timeline-button relative w-full text-left pl-8 py-2 text-gray-600 hover:text-blue-600 transition-colors duration-200';
+                button.dataset.id = exp.id;
+                button.innerHTML = `
+                    <div class="timeline-dot bg-white border-2 border-gray-300"></div>
+                    <p class="font-semibold">${exp.company}</p>
+                    <p class="text-sm">${exp.role}</p>
+                `;
+                const wrapper = document.createElement('div');
+                wrapper.className = 'timeline-item relative';
+                wrapper.appendChild(button);
+                timelineControls.appendChild(wrapper);
+                button.addEventListener('click', () => displayExperience(exp.id));
+            });
+            
+            // --- Populate Skills & Training ---
+            const financialSkillsContainer = document.getElementById('financial-skills');
+            resumeData.skills.financial.forEach(skill => {
+                const skillTag = document.createElement('span');
+                skillTag.className = 'bg-blue-100 text-blue-800 text-sm font-medium px-3 py-1.5 rounded-full';
+                skillTag.textContent = skill;
+                financialSkillsContainer.appendChild(skillTag);
+            });
+
+            const technicalSkillsContainer = document.getElementById('technical-skills');
+             resumeData.skills.technical.forEach(skill => {
+                const skillTag = document.createElement('span');
+                skillTag.className = 'bg-gray-200 text-gray-800 text-sm font-medium px-3 py-1.5 rounded-full';
+                skillTag.textContent = skill;
+                technicalSkillsContainer.appendChild(skillTag);
+            });
+            
+            const trainingListContainer = document.getElementById('training-list');
+            resumeData.training.forEach(item => {
+                const li = document.createElement('li');
+                li.textContent = item;
+                trainingListContainer.appendChild(li);
+            });
+
+            // --- Mobile Menu Logic ---
+            const mobileMenuButton = document.getElementById('mobile-menu-button');
+            const mobileMenu = document.getElementById('mobile-menu');
+            mobileMenuButton.addEventListener('click', () => {
+                const isExpanded = mobileMenuButton.getAttribute('aria-expanded') === 'true';
+                mobileMenuButton.setAttribute('aria-expanded', !isExpanded);
+                mobileMenu.classList.toggle('hidden');
+            });
+            
+            document.querySelectorAll('.nav-link').forEach(link => {
+                link.addEventListener('click', () => {
+                    if(!mobileMenu.classList.contains('hidden')) {
+                         mobileMenu.classList.add('hidden');
+                         mobileMenuButton.setAttribute('aria-expanded', 'false');
+                    }
+                })
+            });
+
+            // --- Initial State ---
+            if (resumeData.experience.length > 0) {
+                displayExperience(resumeData.experience[0].id);
+            }
+            document.getElementById('currentYear').textContent = new Date().getFullYear();
+        });
+
+        // --- Navigation Observer Logic (runs after page layout is stable) ---
+        window.addEventListener('load', function() {
+            const navLinks = document.querySelectorAll('.nav-link');
+            const sections = document.querySelectorAll('section');
+            const header = document.getElementById('header');
+            if (!header || navLinks.length === 0 || sections.length === 0) return;
+    
+            const headerHeight = header.offsetHeight;
+    
+            const observerOptions = {
+                root: null,
+                rootMargin: `-${headerHeight}px 0px 0px 0px`,
+                threshold: 0.4,
+            };
+    
+            const sectionObserver = new IntersectionObserver((entries, observer) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        const id = entry.target.getAttribute('id');
+                        navLinks.forEach(link => {
+                            link.classList.remove('active');
+                            const linkHref = link.getAttribute('href');
+                            if (linkHref === `#${id}`) {
+                                link.classList.add('active');
+                            }
+                        });
+                    }
+                });
+            }, observerOptions);
+    
+            sections.forEach(section => {
+                sectionObserver.observe(section);
+            });
+        });
+    </script>
+</body>
+</html>
